@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cafetería</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: url('cafe.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #3e2723;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .overlay {
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 500px;
+      overflow-y: auto;
+      max-height: 95vh;
+    }
+
+    h2 {
+      text-align: center;
+      font-family: 'Pacifico', cursive;
+      color: #6b4f4f;
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      background: #6b4f4f;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #593d3d;
+    }
+
+    #ticket {
+      display: none;
+      background: #fff7ed;
+      border: 2px solid #e0cfc2;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    #ticket h3 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .ticket-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .ticket-row span {
+      font-weight: 600;
+    }
+
+    /* 🔽 Estilos responsivos para móvil */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+        align-items: flex-start;
+        height: auto;
+        background-attachment: scroll;
+      }
+
+      .overlay {
+        padding: 20px;
+        border-radius: 10px;
+        max-height: none;
+        box-shadow: none;
+      }
+
+      input, select, button {
+        font-size: 15px;
+        padding: 10px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <h2>Compra tu café</h2>
+    <form id="formCompra">
+      <input type="text" name="nombre" placeholder="Nombre" required />
+      <input type="text" name="telefono" id="telefono" placeholder="Teléfono (10 dígitos)" maxlength="10" required />
+      <input type="email" name="correo" placeholder="Correo electrónico" required />
+
+      <select name="tipo_cafe" required>
+        <option value="">Tipo de café</option>
+        <option value="Americano">Americano</option>
+        <option value="Capuccino">Capuccino</option>
+        <option value="Latte">Latte</option>
+        <option value="Expreso">Expreso</option>
+      </select>
+
+      <select name="tamano" id="tamano" required>
+        <option value="">Tamaño</option>
+        <option value="chico" data-precio="50">Chico ($50)</option>
+        <option value="mediana" data-precio="80">Mediana ($80)</option>
+        <option value="grande" data-precio="100">Grande ($100)</option>
+      </select>
+
+      <input type="number" name="unidades" id="unidades" placeholder="Unidades" min="1" value="1" required />
+      <input type="hidden" name="total_num" id="total_num" value="0" />
+      <input type="text" id="total" placeholder="Total: $0" readonly style="background:#fff3e0; font-weight:600;" />
+
+      <select name="pago" required>
+        <option value="">Método de pago</option>
+        <option value="Efectivo">Efectivo</option>
+        <option value="Transferencia">Transferencia</option>
+        <option value="Tarjeta">Tarjeta</option>
+      </select>
+
+      <button type="submit">Comprar</button>
+    </form>
+
+    <div id="ticket">
+      <h3>Ticket de Compra</h3>
+      <div class="ticket-row"><span>Cliente:</span> <span id="tNombre"></span></div>
+      <div class="ticket-row"><span>Café:</span> <span id="tCafe"></span></div>
+      <div class="ticket-row"><span>Tamaño:</span> <span id="tTamano"></span></div>
+      <div class="ticket-row"><span>Unidades:</span> <span id="tUnidades"></span></div>
+      <div class="ticket-row"><span>Total:</span> <span id="tTotal"></span></div>
+      <div class="ticket-row"><span>Método de pago:</span> <span id="tPago"></span></div>
+      <div class="ticket-row"><span>Puntos actuales:</span> <span id="tPuntos"></span></div>
+      <div class="ticket-row"><span id="mensajeGratis" style="color:green; font-weight:bold;"></span></div>
+    </div>
+  </div>
+
+  <script>
+    const tamanoSelect = document.getElementById('tamano');
+    const unidadesInput = document.getElementById('unidades');
+    const totalInputVisible = document.getElementById('total');
+    const totalInputHidden = document.getElementById('total_num');
+
+    function calcularTotal() {
+      const opt = tamanoSelect.selectedOptions[0];
+      const precio = parseFloat(opt.dataset.precio || 0);
+      const unidades = parseInt(unidadesInput.value) || 0;
+      const total = precio * unidades;
+      totalInputVisible.value = `Total: $${total}`;
+      totalInputHidden.value = total.toFixed(2);
+    }
+
+    tamanoSelect.addEventListener('change', calcularTotal);
+    unidadesInput.addEventListener('input', calcularTotal);
+
+    function validarTelefono(tel) {
+      return /^\d{10}$/.test(tel);
+    }
+
+    document.getElementById('formCompra').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const form = this;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      if (!validarTelefono(data.telefono)) {
+        alert('Ingresa un teléfono válido de 10 dígitos.');
+        return;
+      }
+
+      data.precio = parseFloat(document.getElementById('total_num').value) || 0;
+
+      fetch('/compra', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+      .then(res => {
+        if (!res.ok) return res.json().then(err => { throw new Error(err.error || 'Error'); });
+        return res.json();
+      })
+      .then(data => {
+        document.getElementById('ticket').style.display = 'block';
+        document.getElementById('tNombre').innerText = data.nombre;
+        document.getElementById('tCafe').innerText = data.tipo_cafe;
+        document.getElementById('tTamano').innerText = data.tamano;
+        document.getElementById('tUnidades').innerText = data.unidades;
+        document.getElementById('tTotal').innerText = `$${data.precio}`;
+        document.getElementById('tPago').innerText = data.pago;
+        document.getElementById('tPuntos').innerText = data.puntos;
+        document.getElementById('mensajeGratis').innerText = data.mensajeGratis || "";
+
+        alert('Compra realizada con éxito! Revisa tu ticket.');
+
+        form.reset();
+        totalInputVisible.value = 'Total: $0';
+        totalInputHidden.value = '0';
+      })
+      .catch(err => alert(err.message));
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+Elabora una cafetería que por cada venta otorga 10 puntos y que al lograr 50 puntos tienen un café de regalo.
+La aplicación al lograr los 50 puntos necesarios debe enviar un correo electrónico o mensaje via whatsaap un mensaje indicando que tiene un café gratis por lograr los puntos, con su base de datos.
+También que el usuario pueda registrar solo los 10 dígitos de su numero y que en la base de datos la marque con la lada para poder enviar el mensaje.
+El formulario debe de llevar: Nombre, telefeno, correo, tipo de café modo despegable, tamaño chcio (50), mediana(80) y grande(100), unidades, precio (automatico al seleccionar el tamañp pago: efectivo, transferencia, tarjeta la compra es ficticia, el diseño debe ser referente a una cafetería  
+cuando se mande el mensaje los puntos se deben de reiniciar y en la base de datos se guarda cuantas veces han obtenido el premio el cliente en una tabla aparte.
+el mensaje de compra exitosa debe aparecer en el mismo sitio
+debe mandarme un ticket 
+
+
+cdm en cafetería 
+npm install express body-parser mysql2 nodemailer @wppconnect-team/wppconnect
+
+node server.js
+
+http://localhost:3000
